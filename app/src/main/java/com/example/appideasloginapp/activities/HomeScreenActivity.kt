@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import androidx.activity.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.appideasloginapp.R
@@ -17,11 +18,7 @@ class HomeScreenActivity : AppCompatActivity() {
 
     private lateinit var bindingHomeScreenActivity: ActivityHomeScreenBinding
 
-    private var listOfUsers: ArrayList<UserListModel.Data> = ArrayList()
-
-    private lateinit var userListAdapter: UserListAdapter
-
-    private lateinit var homeScreenViewModel: HomeScreenViewModel
+    private val viewModel: HomeScreenViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,22 +26,14 @@ class HomeScreenActivity : AppCompatActivity() {
         bindingHomeScreenActivity = ActivityHomeScreenBinding.inflate(layoutInflater)
         setContentView(bindingHomeScreenActivity.root)
 
-        homeScreenViewModel = ViewModelProvider(this,defaultViewModelProviderFactory).get(HomeScreenViewModel::class.java)
+        setRecyclerView()
+    }
 
-        homeScreenViewModel.getUserList(this)
+    private fun setRecyclerView() {
+        viewModel.getUserList(this)
 
-        bindingHomeScreenActivity.recyclerViewUserDetails.layoutManager = LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false)
-
-        homeScreenViewModel.listOfUsers.observe(this){
-            listOfUsers.addAll(it)
-            userListAdapter.notifyDataSetChanged()
-
-            Log.d("", "onCreate: ")
+        viewModel.listOfUsers.observe(this) {
+            bindingHomeScreenActivity.recyclerViewUserDetails.adapter = UserListAdapter(this, it)
         }
-
-
-        userListAdapter = UserListAdapter(this,listOfUsers)
-
-        bindingHomeScreenActivity.recyclerViewUserDetails.adapter = userListAdapter
     }
 }
